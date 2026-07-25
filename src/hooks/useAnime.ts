@@ -116,7 +116,7 @@ export function useAnime() {
   }, [activeCategory, fetchAnime]);
 
   const handleCategoryClick = (cat: Category) => {
-    if (cat === activeCategory) return;
+    if (cat === activeCategory && viewMode === 'home') return;
     setActiveCategory(cat);
     setViewMode('home');
     setHasSearched(false);
@@ -232,7 +232,7 @@ export function useAnime() {
             query: `
 query ($page: Int, $perPage: Int, $from: Int, $to: Int) {
   Page(page: $page, perPage: $perPage) {
-    airingSchedules(notYetAired: true, airingAt_greater: $from, airingAt_lesser: $to, sort: AIRING_AT_ASC) {
+    airingSchedules(notYetAired: true, airingAt_greater: $from, airingAt_lesser: $to, sort: TIME) {
       airingAt
       episode
       media {
