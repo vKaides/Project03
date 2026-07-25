@@ -4,9 +4,10 @@ import type { AniListAnime, AniListResponse, WeeklyScheduleEntry, WeeklySchedule
 export type Category = 'Trending' | 'New Releases' | 'Completed';
 export type ViewMode = 'home' | 'schedule';
 
-const getBaseQuery = (sort: string, status: string | null, search?: string) => {
+const getBaseQuery = (sort: string, status: string | null, search?: string, genre?: string) => {
   const searchClause = search?.trim() ? `, search: "${search.trim().replace(/"/g, '\\"')}"` : '';
   const statusClause = status ? `, status: ${status}` : '';
+  const genreClause = genre ? `, genre: "${genre}"` : '';
 
   return `
 query ($page: Int, $perPage: Int) {
@@ -15,7 +16,7 @@ query ($page: Int, $perPage: Int) {
       hasNextPage
       total
     }
-    media (type: ANIME, sort: ${sort}${statusClause}${searchClause}) {
+    media (type: ANIME, sort: ${sort}${statusClause}${searchClause}${genreClause}) {
       id
       title {
         romaji
@@ -59,17 +60,20 @@ export function useAnime() {
   const [schedule, setSchedule] = useState<WeeklyScheduleEntry[]>([]);
   const [scheduleLoading, setScheduleLoading] = useState(false);
   const [scheduleError, setScheduleError] = useState<string | null>(null);
+  const [genreFilter, setGenreFilter] = useState<string | null>(null);
 
   const fetchAnime = useCallback(async (
     page: number = 1,
     search?: string,
-    category?: Category
+    category?: Category,
+    genre?: string | null
   ) => {
     setLoading(true);
     setError(null);
 
     const cat = category || activeCategory;
     const config = CATEGORIES.find((c) => c.key === cat)!;
+    const resolvedGenre = genre !== undefined ? genre : genreFilter;
 
     try {
       const response = await fetch('https://graphql.anilist.co', {
@@ -79,7 +83,7 @@ export function useAnime() {
           'Accept': 'application/json',
         },
         body: JSON.stringify({
-          query: getBaseQuery(config.sort, config.status, search?.trim() || undefined),
+          query: getBaseQuery(config.sort, config.status, search?.trim() || undefined, resolvedGenre || undefined),
           variables: {
             page,
             perPage: PER_PAGE,
@@ -115,6 +119,17 @@ export function useAnime() {
     fetchAnime(1, undefined, activeCategory);
   }, [activeCategory, fetchAnime]);
 
+  const handleGenreFilter = (genre: string | null) => {
+    setGenreFilter(genre);
+    setViewMode('home');
+    setHasSearched(false);
+    setSearchTerm('');
+    setCurrentPage(1);
+    setTotalPages(1);
+    setHasNextPage(false);
+    fetchAnime(1, undefined, activeCategory, genre);
+  };
+
   const handleCategoryClick = (cat: Category) => {
     if (cat === activeCategory && viewMode === 'home') return;
     setActiveCategory(cat);
@@ -122,6 +137,7 @@ export function useAnime() {
     setHasSearched(false);
     setSearchTerm('');
     setCurrentPage(1);
+    setGenreFilter(null);
   };
 
   const handleViewChange = (nextView: ViewMode) => {
@@ -291,6 +307,7 @@ query ($page: Int, $perPage: Int, $from: Int, $to: Int) {
     handleSearch,
     handleClear,
     handleCategoryClick,
+    handleGenreFilter,
     handleViewChange,
     goToPage,
     handleLogoClick,

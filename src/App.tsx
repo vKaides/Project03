@@ -23,6 +23,7 @@ function App() {
     handleSearch,
     handleClear,
     handleCategoryClick,
+    handleGenreFilter,
     handleViewChange,
     goToPage,
     handleLogoClick,
@@ -46,6 +47,7 @@ function App() {
         onSearch={handleSearch}
         onClear={handleClear}
         onCategoryClick={handleCategoryClick}
+        onGenreFilter={handleGenreFilter}
         onViewChange={handleViewChange}
         onLogoClick={handleLogoClick}
       />

@@ -1,3 +1,4 @@
+import { MegaMenu } from './MegaMenu';
 import type { Category } from '../hooks/useAnime';
 
 interface HeaderProps {
@@ -11,6 +12,7 @@ interface HeaderProps {
   onSearch: (e: React.FormEvent<HTMLFormElement>) => void;
   onClear: () => void;
   onCategoryClick: (cat: Category) => void;
+  onGenreFilter: (genre: string | null) => void;
   onViewChange: (view: 'home' | 'schedule') => void;
   onLogoClick: () => void;
 }
@@ -26,9 +28,19 @@ export function Header({
   onSearch,
   onClear,
   onCategoryClick,
+  onGenreFilter,
   onViewChange,
   onLogoClick,
 }: HeaderProps) {
+  const handleFilterCategory = (slug: string) => {
+    // Convert slug to a proper genre name (capitalize, hyphen to space)
+    const genre = slug
+      .split('-')
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ');
+    onGenreFilter(genre);
+  };
+
   return (
     <header className="app-header">
       <div className="header-inner">
@@ -63,6 +75,17 @@ export function Header({
               {label}
             </a>
           ))}
+
+          <span
+            style={{
+              width: '1px',
+              height: '20px',
+              background: 'var(--border)',
+              margin: '0 4px',
+              flexShrink: 0,
+            }}
+          />
+          <MegaMenu onSelectCategory={handleFilterCategory} />
         </nav>
 
         <form className="header-search-wrapper" onSubmit={onSearch}>
