@@ -5,10 +5,13 @@ interface HeaderProps {
   hasSearched: boolean;
   activeCategory: Category;
   categories: { key: Category; label: string }[];
+  viewMode: 'home' | 'schedule';
+  viewOptions: { key: 'home' | 'schedule'; label: string }[];
   onSearchTermChange: (value: string) => void;
   onSearch: (e: React.FormEvent<HTMLFormElement>) => void;
   onClear: () => void;
   onCategoryClick: (cat: Category) => void;
+  onViewChange: (view: 'home' | 'schedule') => void;
   onLogoClick: () => void;
 }
 
@@ -17,10 +20,13 @@ export function Header({
   hasSearched,
   activeCategory,
   categories,
+  viewMode,
+  viewOptions,
   onSearchTermChange,
   onSearch,
   onClear,
   onCategoryClick,
+  onViewChange,
   onLogoClick,
 }: HeaderProps) {
   return (
@@ -36,11 +42,22 @@ export function Header({
         </button>
 
         <nav className="header-nav">
+          {viewOptions.map(({ key, label }) => (
+            <a
+              key={key}
+              href="#"
+              className={viewMode === key ? 'nav-active' : ''}
+              onClick={(e) => { e.preventDefault(); onViewChange(key); }}
+            >
+              {label}
+            </a>
+          ))}
+
           {categories.map(({ key, label }) => (
             <a
               key={key}
               href="#"
-              className={activeCategory === key ? 'nav-active' : ''}
+              className={activeCategory === key && viewMode === 'home' ? 'nav-active' : ''}
               onClick={(e) => { e.preventDefault(); onCategoryClick(key); }}
             >
               {label}

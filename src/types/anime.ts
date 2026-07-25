@@ -16,8 +16,29 @@ export interface AniListResponse {
     Page: {
       pageInfo: {
         hasNextPage: boolean;
+        total: number | null;
       };
       media: AniListAnime[];
+    };
+  };
+}
+
+export interface WeeklyScheduleEntry {
+  airingAt: number;
+  episode: number;
+  media: {
+    id: number;
+    title: {
+      romaji: string;
+      english: string | null;
+    };
+  };
+}
+
+export interface WeeklyScheduleResponse {
+  data: {
+    Page: {
+      airingSchedules: WeeklyScheduleEntry[];
     };
   };
 }

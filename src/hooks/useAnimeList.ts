@@ -1,8 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { AniListAnime, AniListResponse, WeeklyScheduleEntry, WeeklyScheduleResponse } from '../types/anime';
+import type { AniListAnime, AniListResponse } from '../types/anime';
 
 export type Category = 'Trending' | 'New Releases' | 'Completed';
-export type ViewMode = 'home' | 'schedule';
+
+const CATEGORIES: { key: Category; sort: string; status: string | null; label: string }[] = [
+  { key: 'Trending', sort: 'SCORE_DESC', status: null, label: 'Trending' },
+  { key: 'New Releases', sort: 'POPULARITY_DESC', status: 'RELEASING', label: 'New Releases' },
+  { key: 'Completed', sort: 'SCORE_DESC', status: 'FINISHED', label: 'Completed' },
+];
+
+const PER_PAGE = 24;
 
 const getBaseQuery = (sort: string, status: string | null, search?: string) => {
   const searchClause = search?.trim() ? `, search: "${search.trim().replace(/"/g, '\\"')}"` : '';
@@ -32,20 +39,7 @@ query ($page: Int, $perPage: Int) {
 `;
 };
 
-const CATEGORIES: { key: Category; sort: string; status: string | null; label: string }[] = [
-  { key: 'Trending', sort: 'SCORE_DESC', status: null, label: 'Trending' },
-  { key: 'New Releases', sort: 'POPULARITY_DESC', status: 'RELEASING', label: 'New Releases' },
-  { key: 'Completed', sort: 'SCORE_DESC', status: 'FINISHED', label: 'Completed' },
-];
-
-const VIEW_OPTIONS: { key: ViewMode; label: string }[] = [
-  { key: 'home', label: 'Home' },
-  { key: 'schedule', label: 'Schedule' },
-];
-
-const PER_PAGE = 24;
-
-export function useAnime() {
+export function useAnimeList(initialCategory: Category = 'Trending') {
   const [animeList, setAnimeList] = useState<AniListAnime[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -54,11 +48,7 @@ export function useAnime() {
   const [currentPage, setCurrentPage] = useState(1);
   const [hasNextPage, setHasNextPage] = useState(false);
   const [totalPages, setTotalPages] = useState(1);
-  const [activeCategory, setActiveCategory] = useState<Category>('Trending');
-  const [viewMode, setViewMode] = useState<ViewMode>('home');
-  const [schedule, setSchedule] = useState<WeeklyScheduleEntry[]>([]);
-  const [scheduleLoading, setScheduleLoading] = useState(false);
-  const [scheduleError, setScheduleError] = useState<string | null>(null);
+  const [activeCategory, setActiveCategory] = useState<Category>(initialCategory);
 
   const fetchAnime = useCallback(async (
     page: number = 1,
@@ -113,23 +103,16 @@ export function useAnime() {
 
   useEffect(() => {
     fetchAnime(1, undefined, activeCategory);
-  }, [activeCategory, fetchAnime]);
+  }, [fetchAnime, activeCategory]);
 
   const handleCategoryClick = (cat: Category) => {
     if (cat === activeCategory) return;
     setActiveCategory(cat);
-    setViewMode('home');
     setHasSearched(false);
     setSearchTerm('');
     setCurrentPage(1);
-  };
-
-  const handleViewChange = (nextView: ViewMode) => {
-    setViewMode(nextView);
-    if (nextView === 'schedule') {
-      setHasSearched(false);
-      setSearchTerm('');
-    }
+    setTotalPages(1);
+    setHasNextPage(false);
   };
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
@@ -158,32 +141,7 @@ export function useAnime() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleLogoClick = () => {
-    const targetCategory: Category = 'Trending';
-
-    setHasSearched(false);
-    setSearchTerm('');
-    setCurrentPage(1);
-    setTotalPages(1);
-    setHasNextPage(false);
-    setViewMode('home');
-    setActiveCategory(targetCategory);
-    fetchAnime(1, undefined, targetCategory);
-
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const formatEpisodes = (episodes: number | null): string => {
-    if (episodes === null) return '?/??';
-    return `${episodes}/${episodes}`;
-  };
-
-  const formatScore = (score: number | null): string => {
-    if (score === null) return 'N/A';
-    return (score / 10).toFixed(1);
-  };
-
-  const getPaginationRange = (): (number | 'ellipsis')[] => {
+  const getPaginationRange = () => {
     if (totalPages <= 1) return [];
 
     const pages: (number | 'ellipsis')[] = [];
@@ -206,73 +164,6 @@ export function useAnime() {
     return pages.filter((page, index, arr) => page !== 'ellipsis' || arr[index - 1] !== 'ellipsis');
   };
 
-  const paginationRange = getPaginationRange();
-
-  const getSectionTitle = (): string => {
-    if (viewMode === 'schedule') return 'Upcoming Week Schedule';
-    if (hasSearched) return `Search results for "${searchTerm}"`;
-    return activeCategory === 'Trending' ? 'Top Rated Anime' : activeCategory;
-  };
-
-  useEffect(() => {
-    if (viewMode !== 'schedule') return;
-
-    const fetchSchedule = async () => {
-      setScheduleLoading(true);
-      setScheduleError(null);
-
-      try {
-        const response = await fetch('https://graphql.anilist.co', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          },
-          body: JSON.stringify({
-            query: `
-query ($page: Int, $perPage: Int, $from: Int, $to: Int) {
-  Page(page: $page, perPage: $perPage) {
-    airingSchedules(notYetAired: true, airingAt_greater: $from, airingAt_lesser: $to, sort: AIRING_AT_ASC) {
-      airingAt
-      episode
-      media {
-        id
-        title {
-          romaji
-          english
-        }
-      }
-    }
-  }
-}`,
-            variables: {
-              page: 1,
-              perPage: 100,
-              from: Math.floor(Date.now() / 1000),
-              to: Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60,
-            },
-          }),
-        });
-
-        if (!response.ok) throw new Error('Failed to fetch weekly schedule');
-
-        const result: WeeklyScheduleResponse & { errors?: { message: string }[] } = await response.json();
-
-        if (result.errors?.length) {
-          throw new Error(result.errors[0].message);
-        }
-
-        setSchedule(result.data?.Page?.airingSchedules ?? []);
-      } catch (err) {
-        setScheduleError(err instanceof Error ? err.message : 'Something went wrong');
-      } finally {
-        setScheduleLoading(false);
-      }
-    };
-
-    fetchSchedule();
-  }, [viewMode]);
-
   return {
     animeList,
     loading,
@@ -282,22 +173,12 @@ query ($page: Int, $perPage: Int, $from: Int, $to: Int) {
     currentPage,
     hasNextPage,
     activeCategory,
-    paginationRange,
-    viewMode,
-    schedule,
-    scheduleLoading,
-    scheduleError,
+    paginationRange: getPaginationRange(),
     setSearchTerm,
     handleSearch,
     handleClear,
     handleCategoryClick,
-    handleViewChange,
     goToPage,
-    handleLogoClick,
-    formatEpisodes,
-    formatScore,
-    getSectionTitle,
     CATEGORIES,
-    VIEW_OPTIONS,
   };
 }
