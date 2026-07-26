@@ -1,8 +1,11 @@
+import { useMemo } from 'react';
 import { useAnime } from './hooks/useAnime';
 import { Header } from './components/Header';
 import { AnimeGrid } from './components/AnimeGrid';
 import { Pagination } from './components/Pagination';
 import { ScheduleView } from './components/ScheduleView';
+import { HeroBannerCarousel } from './components/HeroBannerCarousel';
+import type { HeroSlide } from './components/HeroBannerCarousel';
 
 function App() {
   const {
@@ -34,6 +37,15 @@ function App() {
     VIEW_OPTIONS,
   } = useAnime();
 
+  const heroSlides: HeroSlide[] = useMemo(() => {
+    if (viewMode !== 'home') return [];
+    return animeList.slice(0, 5).map((anime) => ({
+      title: anime.title.english || anime.title.romaji,
+      subtitle: 'Stream Now in HD — Ad-Free',
+      image: anime.coverImage.large,
+    }));
+  }, [animeList, viewMode]);
+
   return (
     <>
       <Header
@@ -53,6 +65,10 @@ function App() {
       />
 
       <main className="main-content">
+        {viewMode === 'home' && !loading && !error && heroSlides.length > 0 && (
+          <HeroBannerCarousel slides={heroSlides} />
+        )}
+
         <h2 className="section-title">{getSectionTitle()}</h2>
 
         {viewMode === 'schedule' ? (
