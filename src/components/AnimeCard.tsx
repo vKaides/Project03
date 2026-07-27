@@ -4,30 +4,51 @@ interface AnimeCardProps {
   anime: AniListAnime;
   formatEpisodes: (episodes: number | null) => string;
   formatScore: (score: number | null) => string;
+  isFavorite: boolean;
+  onToggleFavorite: (anime: AniListAnime) => void;
+  onSelectAnime: (anime: AniListAnime) => void;
 }
 
-export function AnimeCard({ anime, formatEpisodes, formatScore }: AnimeCardProps) {
+export function AnimeCard({
+  anime,
+  formatEpisodes,
+  formatScore,
+  isFavorite,
+  onToggleFavorite,
+  onSelectAnime,
+}: AnimeCardProps) {
+  const title = anime.title.english || anime.title.romaji;
+
   return (
-    <div className="anime-card">
+    <article className="anime-card" onClick={() => onSelectAnime(anime)}>
       <div className="anime-card-poster">
         <img
           src={anime.coverImage.large}
-          alt={anime.title.english || anime.title.romaji}
+          alt={title}
           className="anime-card-img"
           loading="lazy"
         />
 
-        {/* Episode badge - top left */}
+        <button
+          type="button"
+          className={`favorite-toggle ${isFavorite ? 'favorite-active' : ''}`}
+          onClick={(event) => {
+            event.stopPropagation();
+            onToggleFavorite(anime);
+          }}
+          aria-label={isFavorite ? `Remove ${title} from favorites` : `Add ${title} to favorites`}
+        >
+          {isFavorite ? '♥' : '♡'}
+        </button>
+
         <span className="anime-card-episode-badge">
           {formatEpisodes(anime.episodes)}
         </span>
 
-        {/* Score badge - bottom right */}
         <span className="anime-card-score-badge">
           ⭐ {formatScore(anime.averageScore)}
         </span>
 
-        {/* Hover overlay with play button */}
         <div className="anime-card-overlay">
           <div className="play-button">
             <svg viewBox="0 0 24 24">
@@ -37,9 +58,7 @@ export function AnimeCard({ anime, formatEpisodes, formatScore }: AnimeCardProps
         </div>
       </div>
 
-      <h3 className="anime-card-title">
-        {anime.title.english || anime.title.romaji}
-      </h3>
-    </div>
+      <h3 className="anime-card-title">{title}</h3>
+    </article>
   );
 }

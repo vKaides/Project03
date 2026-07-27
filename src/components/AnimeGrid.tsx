@@ -5,9 +5,19 @@ interface AnimeGridProps {
   animeList: AniListAnime[];
   formatEpisodes: (episodes: number | null) => string;
   formatScore: (score: number | null) => string;
+  isFavorite: (anime: AniListAnime) => boolean;
+  onToggleFavorite: (anime: AniListAnime) => void;
+  onSelectAnime: (anime: AniListAnime) => void;
 }
 
-export function AnimeGrid({ animeList, formatEpisodes, formatScore }: AnimeGridProps) {
+export function AnimeGrid({
+  animeList,
+  formatEpisodes,
+  formatScore,
+  isFavorite,
+  onToggleFavorite,
+  onSelectAnime,
+}: AnimeGridProps) {
   return (
     <div className="anime-grid">
       {animeList.map((anime) => (
@@ -16,6 +26,9 @@ export function AnimeGrid({ animeList, formatEpisodes, formatScore }: AnimeGridP
           anime={anime}
           formatEpisodes={formatEpisodes}
           formatScore={formatScore}
+          isFavorite={isFavorite(anime)}
+          onToggleFavorite={onToggleFavorite}
+          onSelectAnime={onSelectAnime}
         />
       ))}
     </div>

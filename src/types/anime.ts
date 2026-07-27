@@ -6,9 +6,21 @@ export interface AniListAnime {
   };
   coverImage: {
     large: string;
+    extraLarge?: string | null;
   };
   averageScore: number | null;
   episodes: number | null;
+  description?: string | null;
+  genres?: string[];
+  status?: string | null;
+  season?: string | null;
+  seasonYear?: number | null;
+  startDate?: {
+    year: number | null;
+    month: number | null;
+    day: number | null;
+  } | null;
+  bannerImage?: string | null;
 }
 
 export interface AniListResponse {
