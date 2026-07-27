@@ -59,6 +59,12 @@ export function AnimeCard({
       </div>
 
       <h3 className="anime-card-title">{title}</h3>
+      {anime.description && (
+        <p className="anime-card-description">
+          {anime.description.replace(/<[^>]+>/g, '').slice(0, 90)}
+          {anime.description.replace(/<[^>]+>/g, '').length > 90 ? '...' : ''}
+        </p>
+      )}
     </article>
   );
 }

@@ -1,29 +1,25 @@
 import { useEffect, useRef, useState } from 'react';
 
 interface MegaMenuProps {
-  onSelectCategory: (slug: string) => void;
+  onSelectCategory: (genre: string) => void;
 }
 
 const CATEGORY_TAGS = [
-  'Action', 'Adventure', 'Comedy', 'Romance',
-  'Fantasy', 'Sci-Fi', 'Isekai', 'Supernatural',
-  'School', 'Drama', 'Horror', 'Mystery',
-  'Slice of Life', 'Sports', 'Mecha', 'Music',
-  'Thriller', 'Historical', 'Military', 'Psychological',
-  'Shounen', 'Seinen', 'Shoujo', 'Josei',
+  'Action', 'Adventure', 'Cars', 'Comedy',
+  'Dementia', 'Demons', 'Drama', 'Ecchi',
+  'Fantasy', 'Game', 'Harem', 'Historical',
+  'Horror', 'Josei', 'Kids', 'Magic',
+  'Martial Arts', 'Mecha', 'Military', 'Music',
+  'Mystery', 'Parody', 'Police', 'Psychological',
+  'Romance', 'Samurai', 'School', 'Sci-Fi',
+  'Shoujo', 'Shoujo Ai', 'Shounen', 'Shounen Ai',
+  'Slice of Life', 'Space', 'Sports', 'Super Power',
+  'Supernatural', 'Thriller', 'Vampire', 'Yaoi',
+  'Yuri',
 ];
-
-const BOTTOM_LINKS = [
-  { icon: '🔍', label: 'Advanced Filter' },
-  { icon: '🎬', label: 'Movies' },
-  { icon: '📅', label: 'Schedule' },
-];
-
-const TAB_KEYS = ['Categories', 'Anime', 'Movies', 'Release Year'];
 
 export function MegaMenu({ onSelectCategory }: MegaMenuProps) {
   const [open, setOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState('Categories');
   const menuRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
 
@@ -61,13 +57,8 @@ export function MegaMenu({ onSelectCategory }: MegaMenuProps) {
     return () => document.removeEventListener('keydown', handleKey);
   }, [open]);
 
-  const handleCategoryClick = (slug: string) => {
-    onSelectCategory(slug);
-    setOpen(false);
-  };
-
-  const handleBottomLink = (label: string) => {
-    onSelectCategory(label.toLowerCase().replace(/\s+/g, '-'));
+  const handleCategoryClick = (category: string) => {
+    onSelectCategory(category);
     setOpen(false);
   };
 
@@ -121,39 +112,6 @@ export function MegaMenu({ onSelectCategory }: MegaMenuProps) {
               padding: '20px',
             }}
           >
-            {/* Top Header Tabs */}
-            <div
-              style={{
-                display: 'flex',
-                gap: '6px',
-                marginBottom: '16px',
-              }}
-            >
-              {TAB_KEYS.map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  style={{
-                    padding: '8px 18px',
-                    borderRadius: '8px',
-                    border: 'none',
-                    fontSize: '14px',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    background:
-                      activeTab === tab ? 'var(--accent)' : 'rgba(255,255,255,0.06)',
-                    color: activeTab === tab ? '#fff' : 'var(--text-muted)',
-                    transition: 'background 0.2s, color 0.2s',
-                  }}
-                >
-                  {tab}
-                </button>
-              ))}
-            </div>
-
-            {/* Divider */}
-            <div style={{ height: '1px', background: 'var(--border)', margin: '0 0 16px' }} />
-
             {/* Category Grid */}
             <div
               style={{
@@ -166,7 +124,7 @@ export function MegaMenu({ onSelectCategory }: MegaMenuProps) {
               {CATEGORY_TAGS.map((cat) => (
                 <button
                   key={cat}
-                  onClick={() => handleCategoryClick(cat.toLowerCase().replace(/\s+/g, '-'))}
+                  onClick={() => handleCategoryClick(cat)}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -198,43 +156,6 @@ export function MegaMenu({ onSelectCategory }: MegaMenuProps) {
 
             {/* Divider */}
             <div style={{ height: '1px', background: 'var(--border)', marginBottom: '14px' }} />
-
-            {/* Bottom Quick Actions */}
-            <div style={{ display: 'flex', gap: '10px' }}>
-              {BOTTOM_LINKS.map((link) => (
-                <button
-                  key={link.label}
-                  onClick={() => handleBottomLink(link.label)}
-                  style={{
-                    flex: 1,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '8px',
-                    padding: '10px 12px',
-                    borderRadius: '10px',
-                    border: '1px solid var(--border)',
-                    background: 'rgba(255,255,255,0.03)',
-                    color: 'var(--text-muted)',
-                    fontSize: '13px',
-                    fontWeight: 500,
-                    cursor: 'pointer',
-                    transition: 'background 0.2s, color 0.2s',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
-                    e.currentTarget.style.color = 'var(--text)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
-                    e.currentTarget.style.color = 'var(--text-muted)';
-                  }}
-                >
-                  <span>{link.icon}</span>
-                  <span>{link.label}</span>
-                </button>
-              ))}
-            </div>
           </div>
         </div>
       )}

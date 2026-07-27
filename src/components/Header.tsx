@@ -32,12 +32,7 @@ export function Header({
   onViewChange,
   onLogoClick,
 }: HeaderProps) {
-  const handleFilterCategory = (slug: string) => {
-    // Convert slug to a proper genre name (capitalize, hyphen to space)
-    const genre = slug
-      .split('-')
-      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-      .join(' ');
+  const handleFilterCategory = (genre: string) => {
     onGenreFilter(genre);
   };
 

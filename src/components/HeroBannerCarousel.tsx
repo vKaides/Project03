@@ -1,17 +1,20 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import type { AniListAnime } from '../types/anime';
 
 export interface HeroSlide {
   title: string;
   subtitle: string;
   image: string;
   description?: string;
+  anime?: AniListAnime;
 }
 
 interface HeroBannerCarouselProps {
   slides: HeroSlide[];
+  onReadDescription: (anime: AniListAnime) => void;
 }
 
-export function HeroBannerCarousel({ slides }: HeroBannerCarouselProps) {
+export function HeroBannerCarousel({ slides, onReadDescription }: HeroBannerCarouselProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -87,17 +90,35 @@ export function HeroBannerCarousel({ slides }: HeroBannerCarouselProps) {
             </h1>
 
             {/* Subtitle */}
-            <p className="text-zinc-400 text-lg mb-6 max-w-md">
+            <p className="text-zinc-400 text-lg mb-4 max-w-xl">
               {slide.subtitle}
             </p>
 
+            {slide.description && (
+              <p className="text-zinc-500 text-base mb-6 max-w-xl">
+                {slide.description}
+              </p>
+            )}
+
             {/* CTA Buttons */}
             <div className="flex flex-wrap items-center gap-4 mb-8">
-              <button className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-full px-7 py-3 shadow-lg shadow-indigo-500/25 hover:scale-105 transition-transform duration-200 cursor-pointer">
-                WATCH NOW
+              <button
+                type="button"
+                onClick={() => {
+                  if (slide.anime) onReadDescription(slide.anime);
+                }}
+                className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold rounded-full px-7 py-3 shadow-lg shadow-teal-500/25 hover:scale-105 transition-transform duration-200 cursor-pointer"
+              >
+                READ DESCRIPTION
               </button>
-              <button className="uppercase text-sm font-semibold text-zinc-300 hover:text-white tracking-wider transition-colors duration-200 cursor-pointer">
-                EXPLORE SERIES
+              <button
+                type="button"
+                onClick={() => {
+                  if (slide.anime) onReadDescription(slide.anime);
+                }}
+                className="uppercase text-sm font-semibold text-zinc-300 hover:text-white tracking-wider transition-colors duration-200 cursor-pointer"
+              >
+                VIEW DETAILS
               </button>
             </div>
 

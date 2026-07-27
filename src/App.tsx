@@ -63,10 +63,16 @@ function App() {
 
   const heroSlides: HeroSlide[] = useMemo(() => {
     if (viewMode !== 'home') return [];
+
+    const stripHtml = (text: string) => text.replace(/<[^>]+>/g, '').trim();
+
     return animeList.slice(0, 5).map((anime) => ({
       title: anime.title.english || anime.title.romaji,
-      subtitle: 'Stream Now in HD — Ad-Free',
+      subtitle: 'Discover the story, characters, and world behind this anime.',
+      description: anime.description ? stripHtml(anime.description).slice(0, 180) :
+        'Tap the banner below to learn more about the latest featured anime.',
       image: anime.coverImage.large,
+      anime,
     }));
   }, [animeList, viewMode]);
 
@@ -83,6 +89,14 @@ function App() {
     });
   };
 
+  const navigateToHome = () => {
+    if (currentView === 'details') {
+      setSelectedAnime(null);
+      setCurrentView('home');
+      window.history.pushState({}, '', '/');
+    }
+  };
+
   const handleSelectAnime = (anime: AniListAnime) => {
     setSelectedAnime(anime);
     setCurrentView('details');
@@ -95,6 +109,31 @@ function App() {
     setSelectedAnime(null);
     setCurrentView('home');
     window.history.pushState({}, '', '/');
+  };
+
+  const handleHeaderCategoryClick = (cat: import('./hooks/useAnime').Category) => {
+    navigateToHome();
+    handleCategoryClick(cat);
+  };
+
+  const handleHeaderSearch = (e: React.FormEvent<HTMLFormElement>) => {
+    navigateToHome();
+    handleSearch(e);
+  };
+
+  const handleHeaderClear = () => {
+    navigateToHome();
+    handleClear();
+  };
+
+  const handleHeaderViewChange = (nextView: import('./hooks/useAnime').ViewMode) => {
+    navigateToHome();
+    handleViewChange(nextView);
+  };
+
+  const handleHeaderLogoClick = () => {
+    navigateToHome();
+    handleLogoClick();
   };
 
   useEffect(() => {
@@ -128,12 +167,12 @@ function App() {
         viewMode={viewMode}
         viewOptions={VIEW_OPTIONS}
         onSearchTermChange={setSearchTerm}
-        onSearch={handleSearch}
-        onClear={handleClear}
-        onCategoryClick={handleCategoryClick}
+        onSearch={handleHeaderSearch}
+        onClear={handleHeaderClear}
+        onCategoryClick={handleHeaderCategoryClick}
         onGenreFilter={handleGenreFilter}
-        onViewChange={handleViewChange}
-        onLogoClick={handleLogoClick}
+        onViewChange={handleHeaderViewChange}
+        onLogoClick={handleHeaderLogoClick}
       />
 
       <main className="main-content">
@@ -149,7 +188,7 @@ function App() {
         ) : (
           <>
             {viewMode === 'home' && !loading && !error && heroSlides.length > 0 && (
-              <HeroBannerCarousel slides={heroSlides} />
+              <HeroBannerCarousel slides={heroSlides} onReadDescription={handleSelectAnime} />
             )}
 
             {favorites.length > 0 && (

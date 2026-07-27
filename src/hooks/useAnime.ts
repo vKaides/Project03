@@ -125,7 +125,7 @@ export function useAnime() {
     } finally {
       setLoading(false);
     }
-  }, [activeCategory]);
+  }, [activeCategory, genreFilter]);
 
   useEffect(() => {
     fetchAnime(1, undefined, activeCategory);
