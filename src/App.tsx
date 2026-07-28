@@ -89,14 +89,6 @@ function App() {
     });
   };
 
-  const navigateToHome = () => {
-    if (currentView === 'details') {
-      setSelectedAnime(null);
-      setCurrentView('home');
-      window.history.pushState({}, '', '/');
-    }
-  };
-
   const handleSelectAnime = (anime: AniListAnime) => {
     setSelectedAnime(anime);
     setCurrentView('details');
@@ -106,33 +98,35 @@ function App() {
   const getAnimeTitle = (anime: AniListAnime) => anime.title.english || anime.title.romaji;
 
   const handleBackToHome = () => {
-    setSelectedAnime(null);
-    setCurrentView('home');
-    window.history.pushState({}, '', '/');
+    if (currentView === 'details') {
+      setSelectedAnime(null);
+      setCurrentView('home');
+      window.history.pushState({}, '', '/');
+    }
   };
 
   const handleHeaderCategoryClick = (cat: import('./hooks/useAnime').Category) => {
-    navigateToHome();
+    handleBackToHome();
     handleCategoryClick(cat);
   };
 
   const handleHeaderSearch = (e: React.FormEvent<HTMLFormElement>) => {
-    navigateToHome();
+    handleBackToHome();
     handleSearch(e);
   };
 
   const handleHeaderClear = () => {
-    navigateToHome();
+    handleBackToHome();
     handleClear();
   };
 
   const handleHeaderViewChange = (nextView: import('./hooks/useAnime').ViewMode) => {
-    navigateToHome();
+    handleBackToHome();
     handleViewChange(nextView);
   };
 
   const handleHeaderLogoClick = () => {
-    navigateToHome();
+    handleBackToHome();
     handleLogoClick();
   };
 

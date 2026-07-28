@@ -1,4 +1,4 @@
-interface PaginationProps {
+export interface PaginationProps {
   currentPage: number;
   hasNextPage: boolean;
   paginationRange: (number | 'ellipsis')[];

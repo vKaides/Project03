@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { getPaginationRange } from '../utils/pagination';
 import type { AniListAnime, AniListResponse, WeeklyScheduleEntry, WeeklyScheduleResponse } from '../types/anime';
 
 export type Category = 'Trending' | 'New Releases' | 'Completed';
@@ -211,30 +212,7 @@ export function useAnime() {
     return (score / 10).toFixed(1);
   };
 
-  const getPaginationRange = (): (number | 'ellipsis')[] => {
-    if (totalPages <= 1) return [];
-
-    const pages: (number | 'ellipsis')[] = [];
-    const safeCurrentPage = Math.min(Math.max(currentPage, 1), totalPages);
-    const startPage = Math.max(1, safeCurrentPage - 2);
-    const endPage = Math.min(totalPages, safeCurrentPage + 2);
-
-    if (startPage > 1) {
-      pages.push(1, 'ellipsis');
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(i);
-    }
-
-    if (endPage < totalPages) {
-      pages.push('ellipsis', totalPages);
-    }
-
-    return pages.filter((page, index, arr) => page !== 'ellipsis' || arr[index - 1] !== 'ellipsis');
-  };
-
-  const paginationRange = getPaginationRange();
+  const paginationRange = getPaginationRange(currentPage, totalPages);
 
   const getSectionTitle = (): string => {
     if (viewMode === 'schedule') return 'Upcoming Week Schedule';
